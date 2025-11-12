@@ -12,6 +12,7 @@ class App(customtkinter.CTk):
         self.geometry("1920x1080")
         self.state('zoomed')
         self.resizable(True, True)
+        self.spot_states =[False] * 28
 
         # ========= CONFIGURE GRID =========
         self.grid_rowconfigure(0, weight=1)
@@ -174,16 +175,20 @@ class App(customtkinter.CTk):
         self.parkings_frame1 = customtkinter.CTkFrame(self.checkframe, fg_color='#333333')
         self.parkings_frame1.pack(pady=20)
 
-        i=0
-        while(i<14):
-            self.spot = customtkinter.CTkLabel(self.parkings_frame1, text="", width=50, height=50, fg_color="#bf69af", corner_radius=5)
-            self.spot.grid(row=0, column=i, padx=3, pady=3)
-            i= i+1
-        i=0
-        while(i<14):
-            self.spot = customtkinter.CTkLabel(self.parkings_frame1, text="", width=50, height=50, fg_color="#bf69af", corner_radius=5)
-            self.spot.grid(row=1, column=i, padx=3, pady=3)
-            i= i+1
+        self.parking_spots_check=[]
+        for row in range(rows):
+            for col in range(cols):
+                index = row * cols + col  # calculate global index 0–27
+                spot = customtkinter.CTkLabel(
+                    self.parkings_frame1,
+                    text=str(index + 1),
+                    width=50, height=50,
+                    fg_color="#bf69af",
+                    corner_radius=5,
+                    text_color='black'
+                    )
+                spot.grid(row=row, column=col, padx=3, pady=3)
+                self.parking_spots_check.append(spot)
 
         customtkinter.CTkLabel(
             self.checkframe, text="Floor 1", font=("Arial", 20, "bold")
@@ -229,26 +234,31 @@ class App(customtkinter.CTk):
 
     def optionMenusize(self,size):
         self.carSize.set(size)
-        print("selected size: " ,self.carSize.get())
 
     def toggle_spot(self, row, col, index):
-        self.spot = self.parking_spots[index]
-        current_color = self.spot.cget("fg_color")
-
-        if current_color == "#bf69af":  # free
-            self.spot.configure(fg_color="red")
-        else:
-            self.spot.configure(fg_color="#bf69af")
+        """Click in PARK frame."""
+        self.spot_states[index] = not self.spot_states[index]
+        self.update_spot_color(index)
 
     def toggle_spot_exit(self, row, col, index):
-        spot = self.parking_spots_exit[index]
-        current_color = spot.cget("fg_color")
+        """Click in EXIT frame."""
+        self.spot_states[index] = not self.spot_states[index]
+        self.update_spot_color(index)
+        
+    def update_spot_color(self, index):
+        """Update both frames' colors based on shared spot state."""
+        color = "red" if self.spot_states[index] else "#bf69af"
 
-        # Toggle between pink and grey (or any colors you like)
-        if current_color == "#bf69af":
-            spot.configure(fg_color="red")
-        else:
-            spot.configure(fg_color="#bf69af")
+        # Update color in PARK frame
+        if index < len(self.parking_spots):
+            self.parking_spots[index].configure(fg_color=color)
+
+        # Update color in EXIT frame
+        if index < len(self.parking_spots_exit):
+            self.parking_spots_exit[index].configure(fg_color=color)
+
+        if index < len(self.parking_spots_check):
+            self.parking_spots_check[index].configure(fg_color=color)
 
 # ========= RUN APP =========
 if __name__ == "__main__":

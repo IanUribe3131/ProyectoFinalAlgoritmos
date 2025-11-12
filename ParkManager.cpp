@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <winsock.h>
 
 using namespace std;
 
@@ -18,6 +19,7 @@ int option; //opcion del usuario
 vector<Espacios> parkingSpaces(4);
 
 // FUNCTION PROTOTYPE
+// Definimos el tipo de funciones 
 void available(void);
 void entrance(void);
 void exitpark(void);
@@ -25,7 +27,7 @@ bool checkAvailability(int type, int *piso, int *lugares);
 
 int main()
 {
-  //iniciamos vacios los lugares
+  //iniciamos vacios los lugares vacios
   for(int i = 0; i < parkingSpaces.size(); i++){
   parkingSpaces[i].g = vector<bool>(8, false);
   parkingSpaces[i].p = vector<bool>(20, false);
@@ -34,7 +36,7 @@ int main()
   //bool para ciclo
   bool running = true;
   while(running == true){
-    //bienvenida
+    //bienvenida al sistema
     cout<<"== Welcome to park manager! ==\n";
     cout<<"select one of the following options: \n 1) Park your car \n 2) Exit parking spot \n 3) Check availability \n 4) Exit the parking system \n";
     cout<<"Your option: ";
@@ -77,13 +79,14 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
 
   //primer busqueda para lugares segun el tipo de carro
   for(int i = 0; i < parkingSpaces.size(); i++){
-    int numAvailable = 0;
-      if(type == 1){
+    int numAvailable = 0; //contar los lugares que hay disponibles
+      if(type == 1){ //lugares disponibles de carros pequenos
       numAvailable = count(parkingSpaces[i].p.begin(), parkingSpaces[i].p.end(), false);
       }
-      else if(type == 2){
+      else if(type == 2){ //lugares disponibles de carros grandes
       numAvailable = count(parkingSpaces[i].g.begin(), parkingSpaces[i].g.end(), false);
     }
+    //revisar que si haya lugares disponibles en general
       if(numAvailable > 0){
         *piso = i;
         *lugares = numAvailable;
@@ -97,8 +100,8 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
       for(int i = 0; i < parkingSpaces.size(); i++){
         int numAvailable = count(parkingSpaces[i].g.begin(), parkingSpaces[i].g.end(), false);
         if(numAvailable > 0){
-          *piso = i;
-          *lugares = numAvailable;
+          *piso = i; //piso donde se encontro el lugar
+          *lugares = numAvailable; //numero de lugares
           return true;
       }
     }
@@ -111,12 +114,18 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
 //buscar los lugares disponibles, e imprimir cuantos hay en cada piso
     void available(){
     for(int i = 0; i < parkingSpaces.size(); i++){
+      //contar espacios de carros grandes
       int bigAvailable = count(parkingSpaces[i].g.begin(), parkingSpaces[i].g.end(), false);
+
+      //contar espacios de carros pequenos
       int smallAvailable = count(parkingSpaces[i].p.begin(), parkingSpaces[i].p.end(), false);
+
+      //revisar que si haya lugares disponibles para luego decirle al usuario cuantos hay y en que piso
       if(bigAvailable > 0 || smallAvailable > 0){
       cout<<"There are: "<< bigAvailable <<" big parking spots available &:"<<smallAvailable<<" small parking spots available in level: " << i << endl << endl;
     }
     else{
+      //no hay lugares disponibles 
       cout<<"There are no parking spots available in level: " << i << endl << endl;
     }
   }
@@ -131,7 +140,11 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
       cout<<"2) Big Car"<<endl;
       cout<<"Your option: ";
       cin>>carSize;
+
+      //variables sobre el piso donde se encuentran los lugares disponibles y cuantos lugares hay
       int piso, lugares;
+      
+      //puntero para revisar y poder estacionar el carro
       bool disponible = checkAvailability(carSize, &piso,&lugares);
       bool lugarasignado = false;
 
@@ -142,12 +155,15 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
         
 
         //Buscamos en el piso asigando un lugar de carros pequenos disponible
-        cout << "There are: " << lugares << " ,in the floor: " << piso << endl;
+        cout << "There are: " << lugares << ", in the floor: " << piso << endl;
         for(int i =0; i < parkingSpaces[piso].p.size(); i++){ 
         if (parkingSpaces[piso].p[i] == false){
           parkingSpaces[piso].p[i] = true;
           lugarasignado = true;
-          cout << "You have parked your car in floor: " << piso << " in the space: " << i << endl;
+
+          //se estaciona el carro en el primer lugar vacio que se encontro
+          //se le da la informacion al usuario de donde se estaciono
+          cout << "You have parked your car in floor: " << piso << ", in the space: " << i << endl;
           cout << "You parked in a small car space" << endl;
           break;
         }
@@ -159,7 +175,10 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
             if (parkingSpaces[piso].g[i] == false){
             parkingSpaces[piso].g[i] = true;
             lugarasignado = true;
-            cout << "You have parked your car in floor: " << piso << " in the space: " << i << endl;
+
+            //de igual manera se le asigna el primer lugar de carros grandes que se encuentre vacio
+            //se le notifica al usuario que quedo estacionado en un lugar de carros grandes
+            cout << "You have parked your car in floor: " << piso << ", in the space: " << i << endl;
             cout << "You have parked in a big car space" << endl;
             break;
             }
@@ -173,6 +192,9 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
           for(int i =0; i < parkingSpaces[piso].g.size(); i++){ 
           if (parkingSpaces[piso].g[i] == false){
             parkingSpaces[piso].g[i] = true;
+
+            //se estaciona el carro en el primer lugar vacio que se encontro
+            //se le da la informacion al usuario de donde se estaciono
             cout << "You have parked your car in floor: " << piso << " in the space: " << i << endl;
             cout << "You have parked in a big car space" << endl;
             break;
@@ -181,12 +203,15 @@ bool checkAvailability(int type, int *piso, int *lugares) //1 si es carro chico,
         break;
 
         default:
+        // la persona no eligio una opcion de tamano valido para el carro
         cout << "Enter a valid size of Car, Please" << endl;
         break;
       }
     }
     else{
+      //el estacionamiento esta lleno
       cout << "There are no spaces for you to park your car" << endl;
+      cout << "Please wait until a car leaves the parking" << endl;
     }
   }
 
@@ -212,23 +237,34 @@ void exitpark(){
       //sacar un carro chico
       case 1:
       char typeplace;
+      //como hay la posibilidad de que la persona se estacionara en un lugar de carros grandes se le pregunta
       cout << "Did you parked in a big car space (y/n)? ";
       cin >> typeplace;
+
+      //se estaciono en un lugar para carros pequenos
       if(typeplace != 'y'){
+
+        //si la informacion del lugar es correcta, el lugar de estacionamiento se queda vacio
         if (parkingSpaces[floor].p[place] == true){
             parkingSpaces[floor].p[place] = false;
             cout << "You have removed your car from floor: " << floor << " in the space: " << place << endl;
           }
+
+        //la informacion que puso el usuario la puso erroneamente | el lugar que puso esta vacio
         else{
           cout << "The floor or the place you have entered, are not valid" << endl;
           cout << "Please verify your parking information" << endl;
         }
       }
+
+      //la persona se estaciono en un lugar de carros grandes
       else{
         if (parkingSpaces[floor].g[place] == true){
             parkingSpaces[floor].g[place] = false;
             cout << "You have removed your car from floor: " << floor << " in the space: " << place << endl;
           }
+
+        //la informacion que puso el usuario la puso erroneamente | el lugar que puso esta vacio
         else{
           cout << "The floor or the place you have entered, are not valid" << endl;
           cout << "Please verify your parking information" << endl;
@@ -238,16 +274,21 @@ void exitpark(){
 
       //sacar un carro grande
       case 2:
+
+      //si la informacion del lugar es correcta, el lugar de estacionamiento se queda vacio
         if (parkingSpaces[floor].g[place] == true){
               parkingSpaces[floor].g[place] = false;
               cout << "You have removed your car from floor: " << floor << " in the space: " << place << endl;
             }
+
+          //la informacion que puso el usuario la puso erroneamente | el lugar que puso esta vacio
           else{
             cout << "The floor or the place you have entered, are not valid" << endl;
             cout << "Please verify your parking information" << endl;
           }
       break;
 
+      // la persona no eligio un tamano de carro valido
       default:
       cout << "Enter a valid size of Car, Please" << endl;
       break;
